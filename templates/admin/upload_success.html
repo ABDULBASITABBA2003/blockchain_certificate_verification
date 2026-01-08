@@ -2,50 +2,79 @@
 {% block content %}
 
 <style>
+    /* PAGE BACKGROUND (same as first file) */
+    body {
+        background: linear-gradient(135deg, #3c0f63, #2a2d7c, #1c1b4a);
+        background-attachment: fixed;
+        color: #f1f1f1;
+    }
+
+    /* SUCCESS HEADER */
     .result-header {
         background: linear-gradient(135deg, #4caf50, #2e7d32);
         color: white;
         padding: 18px 25px;
-        border-radius: 10px;
+        border-radius: 12px;
         font-size: 1.4rem;
         font-weight: bold;
         display: flex;
         align-items: center;
         gap: 10px;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.35);
     }
 
-    .result-box {
-        padding: 25px;
-        background: white;
-        border-radius: 12px;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    /* FROSTED GLASS BOX */
+    .frost-box {
+        background: rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border-radius: 18px;
+        padding: 35px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+        margin: 40px 0;
     }
 
+    /* TEXT STYLES */
     .info-label {
         font-weight: 600;
-        color: #333;
+        color: #ffffff;
     }
 
-    .preview-img {
-        width: 100%;
-        max-height: 350px;
-        object-fit: contain;
-        border-radius: 10px;
-        cursor: pointer;
-        transition: transform 0.2s;
+    #info-val {
+        color: #e6e6e6;
     }
+
+    #hashText {
+        color: #ffd6ff;
+        word-break: break-all;
+    }
+
+    /* PREVIEW IMAGES */
+    .preview-img {
+    width: 100%;
+    max-height: 320px;
+    object-fit: contain;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    /* box-shadow: 0 6px 16px rgba(0,0,0,0.4); */
+    border-radius: 0; /* REMOVED */
+}
+
 
     .preview-img:hover {
-        transform: scale(1.02);
+        transform: scale(1.03);
     }
 
-    /* MODAL VIEWER */
+    hr {
+        border-color: rgba(255,255,255,0.2);
+    }
+
+    /* MODAL IMAGE */
     .modal-img {
         width: 100%;
-        border-radius: 10px;
+        /* border-radius: 12px; */
     }
 </style>
-
 
 <div class="container mt-5 mb-5">
 
@@ -54,65 +83,72 @@
         ✔ Certificate Issued Successfully
     </div>
 
-    <div class="result-box">
+    <div class="frost-box">
 
         <!-- INFORMATION SECTION -->
-        <p><span class="info-label">Student Name:</span> {{ cert.student_name }}</p>
-        <p><span class="info-label">Registration Number:</span> {{ cert.reg_number }}</p>
+        <p><span class="info-label">Student Name:</span> <span id="info-val">{{ cert.student_name }}</span></p>
+        <p><span class="info-label">Registration Number:</span> <span id="info-val">{{ cert.reg_number }}</span></p>
 
         <p>
-            <span class="info-label">Certificate Hash:</span>
+            <span class="info-label">Certificate Hash:</span><br>
             <code id="hashText">{{ cert.certificate_hash }}</code>
         </p>
 
-        <p><span class="info-label">Blockchain Index:</span> {{ cert.blockchain_index }}</p>
-        <p><span class="info-label">Issued At:</span> {{ cert.uploaded_at }}</p>
-
+        <p><span class="info-label">Blockchain Index:</span> <span id="info-val">{{ cert.blockchain_index }}</span></p>
+        <p><span class="info-label">Issued At:</span>
+            <span id="info-val">{{ cert.uploaded_at.strftime("%d %B %Y, %H:%M") }}</span>
+        </p>
+        <p><span class="info-label">institution:</span> <span id="info-val">{{ cert.institution }}</span></p>
         <hr>
 
-        <!-- CERTIFICATE PREVIEW -->
-        <h5 class="fw-bold mb-2">Certificate Preview</h5>
-
-        {% if cert.certificate_file.endswith(".pdf") %}
-            <a href="/{{ cert.certificate_file }}" target="_blank" class="btn btn-secondary">
-                Open Certificate PDF
-            </a>
-        {% else %}
-            <img src="/{{ cert.certificate_file }}" 
-                 class="preview-img"
-                 onclick="openModal('/{{ cert.certificate_file }}')">
-        {% endif %}
-
+        <div class="row g-4">
+        
+            <!-- CERTIFICATE PREVIEW -->
+            <div class="col-md-6">
+                <h5 class="fw-bold mb-2">Certificate Preview</h5>
+        
+                {% if cert.certificate_file.endswith(".pdf") %}
+                    <a href="/{{ cert.certificate_file }}" target="_blank" class="btn btn-outline-light">
+                        Open Certificate PDF
+                    </a>
+                {% else %}
+                    <img src="/{{ cert.certificate_file }}"
+                         class="preview-img"
+                         onclick="openModal('/{{ cert.certificate_file }}')">
+                {% endif %}
+            </div>
+        
+            <!-- PASSPORT PHOTO -->
+            <div class="col-md-6">
+                <h5 class="fw-bold mb-2">Passport Photo</h5>
+                <img src="/{{ cert.passport_photo }}"
+                     class="preview-img"
+                     style="max-height: 220px;"
+                     onclick="openModal('/{{ cert.passport_photo }}')">
+            </div>
+        
+        </div>
+        
         <hr>
+        
 
-        <!-- PASSPORT PHOTO -->
-        <h5 class="fw-bold mb-2">Passport Photo</h5>
-        <img src="/{{ cert.passport_photo }}" 
-             class="preview-img"
-             style="max-height:200px;"
-             onclick="openModal('/{{ cert.passport_photo }}')">
-
-        <hr>
-
-        <button class="btn btn-primary" onclick="copyHash()">Copy Certificate Hash</button>
-        <a href="/{{ cert.certificate_file }}" download class="btn btn-outline-primary">Download Certificate</a>
+        <!-- ACTION BUTTONS -->
+        <button class="btn btn-outline-light" onclick="copyHash()">Copy Certificate Hash</button>
+        <a href="/{{ cert.certificate_file }}" download class="btn btn-outline-secondary">Download Certificate</a>
 
         <a href="/admin/dashboard" class="btn btn-success float-end">Back to Dashboard</a>
 
     </div>
 </div>
 
-
-
-<!-- IMAGE POPUP MODAL -->
+<!-- IMAGE MODAL -->
 <div class="modal fade" id="imageModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content">
+        <div class="modal-content bg-transparent border-0">
             <img id="modalImage" class="modal-img">
         </div>
     </div>
 </div>
-
 
 <script>
 function copyHash() {

@@ -11,6 +11,8 @@ class Certificate(db.Model):
     level = db.Column(db.String(20), nullable=False)
     grad_year = db.Column(db.String(20), nullable=False)
     issue_date = db.Column(db.String(20), nullable=False)
+    institution = db.Column(db.String(60), nullable=False)
+
 
     certificate_file = db.Column(db.String(300), nullable=False)
     passport_photo = db.Column(db.String(300), nullable=False)

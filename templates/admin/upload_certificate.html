@@ -17,6 +17,7 @@ body {
         padding: 35px;
         box-shadow: 0 8px 20px rgba(0,0,0,0.25);
         margin-bottom: 40px;
+        margin-top: 40px;
         
     }
     .form-control{
@@ -26,9 +27,9 @@ body {
         background-color: rgba(255, 255, 255, 0.18);
     }
 </style>
-<div class="container py-5">
+<div class="container py-5 frost-box">
 
-    <div class= "frost-box">
+    <div>
 
         <h3 class="fw-bold text-white mb-4"> Issue New Certificate</h3>
 
@@ -54,6 +55,8 @@ body {
                     <label class="form-label">Registration Number</label>
                     <input type="text" name="reg_number" class="form-control" required>
                 </div>
+
+                
             </div>
 
             <!-- Academic Info -->
@@ -62,18 +65,23 @@ body {
                     <label class="form-label">Department</label>
                     <input type="text" name="department" class="form-control" required>
                 </div>
-
+            
                 <div class="col-md-4 mb-3">
                     <label class="form-label">Faculty</label>
                     <input type="text" name="faculty" class="form-control" required>
                 </div>
-
+            
                 <div class="col-md-4 mb-3">
                     <label class="form-label">Program</label>
                     <input type="text" name="program" class="form-control" required>
                 </div>
+            
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Institution</label>
+                    <input type="text" name="institution" class="form-control" required>
+                </div>
             </div>
-
+            
             <!-- Level & Year -->
             <div class="row">
                 <div class="col-md-6 mb-3">

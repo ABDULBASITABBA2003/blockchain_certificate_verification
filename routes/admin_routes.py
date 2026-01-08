@@ -5,6 +5,7 @@ from models.models import Certificate
 from models.admin import Admin
 from utils.hash_generator import generate_certificate_hash
 from blockchain.blockchain import Blockchain
+from datetime import date
 import os
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
@@ -101,21 +102,25 @@ def upload_certificate():
     if request.method == "POST":
 
         # Collect student data
+        issue_date = date.today()
         student_data = {
             "student_name": request.form.get("student_name"),
             "reg_number": request.form.get("reg_number"),
             "department": request.form.get("department"),
             "faculty": request.form.get("faculty"),
             "program": request.form.get("program"),
+            "institution": request.form.get("institution"),
             "level": request.form.get("level"),
             "grad_year": request.form.get("grad_year"),
-            "issue_date": request.form.get("issue_date")
-        }
+            "issue_date": issue_date  
+}
+
 
         # Required fields check
-        if any(v is None or v.strip() == "" for v in student_data.values()):
+        if any(v is None or str(v).strip() == "" for v in student_data.values()):
             flash("All fields are required!", "danger")
             return redirect(request.url)
+
 
         cert_file = request.files.get("certificate_file")
         passport = request.files.get("passport_photo")
@@ -145,7 +150,7 @@ def upload_certificate():
 
         # Add to blockchain
         previous_hash = blockchain.get_last_hash()
-        block_index = blockchain.add_block({**student_data, "certificate_hash": certificate_hash})
+        block_index = blockchain.add_block({**student_data, "certificate_hash": certificate_hash, "issue_date": issue_date.isoformat()})
 
         # Save in DB
         new_cert = Certificate(
