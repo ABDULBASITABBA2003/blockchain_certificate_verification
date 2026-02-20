@@ -36,7 +36,7 @@
     {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
     {% for category, message in messages %}
-    <div class="alert alert-{{ category }} mt-2">
+    <div class="alert alert-{{ category }} mt-2 auto-dismiss-alert">
         {{ message }}
     </div>
     {% endfor %}
@@ -106,5 +106,17 @@
         font-size: 1.1rem;
     }
 </style>
+
+<script>
+    setTimeout(function () {
+        document.querySelectorAll('.auto-dismiss-alert').forEach(function (alertEl) {
+            alertEl.style.transition = 'opacity 0.5s ease';
+            alertEl.style.opacity = '0';
+            setTimeout(function () {
+                alertEl.remove();
+            }, 500);
+        });
+    }, 3000);
+</script>
 
 {% endblock %}
