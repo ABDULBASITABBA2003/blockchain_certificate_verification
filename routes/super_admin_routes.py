@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
+from sqlalchemy import or_
 from models import db
 from models.admin import Admin, SuperAdmin
 
@@ -30,10 +31,27 @@ def dashboard():
         flash("Please login first.", "warning")
         return redirect(url_for("super_admin.login"))
 
-    admins = Admin.query.all()
-    total_admins = len(admins)
+    search_term = request.args.get("search", "").strip()
+
+    admins_query = Admin.query
+    if search_term:
+        admins_query = admins_query.filter(
+            or_(
+                Admin.username.ilike(f"%{search_term}%"),
+                Admin.school_name.ilike(f"%{search_term}%"),
+                Admin.email.ilike(f"%{search_term}%")
+            )
+        )
+
+    admins = admins_query.order_by(Admin.created_at.desc()).all()
+    total_admins = Admin.query.count()
     
-    return render_template("super_admin/dashboard.html", admins=admins, total_admins=total_admins)
+    return render_template(
+        "super_admin/dashboard.html",
+        admins=admins,
+        total_admins=total_admins,
+        search_term=search_term
+    )
 
 # --------------------- ADD ADMIN ---------------------
 @super_admin_bp.route("/add-admin", methods=["GET", "POST"])
@@ -62,6 +80,74 @@ def add_admin():
         return redirect(url_for("super_admin.dashboard"))
 
     return render_template("super_admin/add_admin.html")
+
+
+# --------------------- VIEW ADMIN ---------------------
+@super_admin_bp.route("/view-admin/<int:admin_id>")
+def view_admin(admin_id):
+    if "super_admin_id" not in session:
+        flash("Please login first.", "warning")
+        return redirect(url_for("super_admin.login"))
+
+    admin = Admin.query.get_or_404(admin_id)
+    return render_template("super_admin/view_admin.html", admin=admin)
+
+
+# --------------------- EDIT ADMIN ---------------------
+@super_admin_bp.route("/edit-admin/<int:admin_id>", methods=["GET", "POST"])
+def edit_admin(admin_id):
+    if "super_admin_id" not in session:
+        flash("Please login first.", "warning")
+        return redirect(url_for("super_admin.login"))
+
+    admin = Admin.query.get_or_404(admin_id)
+
+    if request.method == "POST":
+        name = request.form.get("name", "").strip()
+        email = request.form.get("email", "").strip()
+        school_name = request.form.get("school_name", "").strip()
+        password = request.form.get("password", "").strip()
+
+        if not name or not email or not school_name:
+            flash("Name, email, and school name are required.", "danger")
+            return redirect(request.url)
+
+        existing_email = Admin.query.filter(
+            Admin.email == email,
+            Admin.id != admin.id
+        ).first()
+
+        if existing_email:
+            flash("Another admin with this email already exists!", "danger")
+            return redirect(request.url)
+
+        admin.username = name
+        admin.email = email
+        admin.school_name = school_name
+
+        if password:
+            admin.set_password(password)
+
+        db.session.commit()
+        flash("Admin updated successfully!", "success")
+        return redirect(url_for("super_admin.dashboard"))
+
+    return render_template("super_admin/edit_admin.html", admin=admin)
+
+
+# --------------------- DELETE ADMIN ---------------------
+@super_admin_bp.route("/delete-admin/<int:admin_id>", methods=["POST"])
+def delete_admin(admin_id):
+    if "super_admin_id" not in session:
+        flash("Please login first.", "warning")
+        return redirect(url_for("super_admin.login"))
+
+    admin = Admin.query.get_or_404(admin_id)
+    db.session.delete(admin)
+    db.session.commit()
+
+    flash("Admin deleted successfully!", "success")
+    return redirect(url_for("super_admin.dashboard"))
 
 # --------------------- LOGOUT ---------------------
 @super_admin_bp.route("/logout")
