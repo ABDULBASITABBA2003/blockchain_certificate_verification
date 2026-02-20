@@ -81,6 +81,63 @@ def add_admin():
 
     return render_template("super_admin/add_admin.html")
 
+
+# --------------------- EDIT ADMIN ---------------------
+@super_admin_bp.route("/edit-admin/<int:admin_id>", methods=["GET", "POST"])
+def edit_admin(admin_id):
+    if "super_admin_id" not in session:
+        flash("Please login first.", "warning")
+        return redirect(url_for("super_admin.login"))
+
+    admin = Admin.query.get_or_404(admin_id)
+
+    if request.method == "POST":
+        name = request.form.get("name", "").strip()
+        email = request.form.get("email", "").strip()
+        school_name = request.form.get("school_name", "").strip()
+        password = request.form.get("password", "").strip()
+
+        if not name or not email or not school_name:
+            flash("Name, email, and school name are required.", "danger")
+            return redirect(request.url)
+
+        existing_email = Admin.query.filter(
+            Admin.email == email,
+            Admin.id != admin.id
+        ).first()
+
+        if existing_email:
+            flash("Another admin with this email already exists!", "danger")
+            return redirect(request.url)
+
+        admin.username = name
+        admin.email = email
+        admin.school_name = school_name
+
+        if password:
+            admin.set_password(password)
+
+        db.session.commit()
+        flash("Admin updated successfully!", "success")
+        return redirect(url_for("super_admin.dashboard"))
+
+    return render_template("super_admin/edit_admin.html", admin=admin)
+
+
+# --------------------- DELETE ADMIN ---------------------
+@super_admin_bp.route("/delete-admin/<int:admin_id>", methods=["POST"])
+def delete_admin(admin_id):
+    if "super_admin_id" not in session:
+        flash("Please login first.", "warning")
+        return redirect(url_for("super_admin.login"))
+
+    admin = Admin.query.get_or_404(admin_id)
+    db.session.delete(admin)
+    db.session.commit()
+
+    flash("Admin deleted successfully!", "success")
+    return redirect(url_for("super_admin.dashboard"))
+
 # --------------------- LOGOUT ---------------------
 @super_admin_bp.route("/logout")
 def logout():
