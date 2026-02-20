@@ -82,6 +82,17 @@ def add_admin():
     return render_template("super_admin/add_admin.html")
 
 
+# --------------------- VIEW ADMIN ---------------------
+@super_admin_bp.route("/view-admin/<int:admin_id>")
+def view_admin(admin_id):
+    if "super_admin_id" not in session:
+        flash("Please login first.", "warning")
+        return redirect(url_for("super_admin.login"))
+
+    admin = Admin.query.get_or_404(admin_id)
+    return render_template("super_admin/view_admin.html", admin=admin)
+
+
 # --------------------- EDIT ADMIN ---------------------
 @super_admin_bp.route("/edit-admin/<int:admin_id>", methods=["GET", "POST"])
 def edit_admin(admin_id):

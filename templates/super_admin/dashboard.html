@@ -92,6 +92,10 @@
                         </td>
                         <td>
                             <div class="d-flex gap-2 flex-wrap">
+                                <a href="{{ url_for('super_admin.view_admin', admin_id=admin.id) }}"
+                                    class="btn btn-sm btn-outline-primary" title="View">
+                                    <i class="bi bi-eye"></i>
+                                </a>
                                 <a href="{{ url_for('super_admin.edit_admin', admin_id=admin.id) }}"
                                     class="btn btn-sm btn-outline-warning">Edit</a>
                                 <form action="{{ url_for('super_admin.delete_admin', admin_id=admin.id) }}" method="POST"
