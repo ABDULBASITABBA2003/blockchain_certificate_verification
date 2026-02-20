@@ -70,9 +70,28 @@
             border-radius: 10px;
         }
 
-        /* NAVBAR — restored to your original color */
+        /* NAVBAR */
         nav.navbar {
-            background-image: linear-gradient(to right, rgba(37, 150, 190), rgb(106, 35, 198)) !important;
+            background: rgba(255, 255, 255, 0.18) !important;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.35);
+        }
+
+        .navbar-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        .page-content {
+            padding-top: 76px;
+        }
+
+        .page-content-home {
+            padding-top: 0;
         }
 
         .navbar-brand {
@@ -100,7 +119,7 @@
 <body>
 
 <!-- NAVBAR -->
-<nav class="navbar navbar-expand-lg navbar-dark shadow-sm">
+<nav class="navbar navbar-expand-lg navbar-dark shadow-sm navbar-overlay">
     <div class="container">
         <a class="navbar-brand" href="/">BCV System</a>
 
@@ -133,7 +152,7 @@
 </nav>
 
 <!-- MAIN CONTENT -->
-<div>
+<div class="page-content {% if active=='home' or request.path=='/' %}page-content-home{% endif %}">
     {% block content %}{% endblock %}
 </div>
 
