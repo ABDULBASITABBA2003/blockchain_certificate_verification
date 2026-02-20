@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
+from sqlalchemy import or_
 from models import db
 from models.admin import Admin, SuperAdmin
 
@@ -30,10 +31,27 @@ def dashboard():
         flash("Please login first.", "warning")
         return redirect(url_for("super_admin.login"))
 
-    admins = Admin.query.all()
-    total_admins = len(admins)
+    search_term = request.args.get("search", "").strip()
+
+    admins_query = Admin.query
+    if search_term:
+        admins_query = admins_query.filter(
+            or_(
+                Admin.username.ilike(f"%{search_term}%"),
+                Admin.school_name.ilike(f"%{search_term}%"),
+                Admin.email.ilike(f"%{search_term}%")
+            )
+        )
+
+    admins = admins_query.order_by(Admin.created_at.desc()).all()
+    total_admins = Admin.query.count()
     
-    return render_template("super_admin/dashboard.html", admins=admins, total_admins=total_admins)
+    return render_template(
+        "super_admin/dashboard.html",
+        admins=admins,
+        total_admins=total_admins,
+        search_term=search_term
+    )
 
 # --------------------- ADD ADMIN ---------------------
 @super_admin_bp.route("/add-admin", methods=["GET", "POST"])

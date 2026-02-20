@@ -43,6 +43,21 @@
     {% endif %}
     {% endwith %}
 
+    <form method="GET" action="{{ url_for('super_admin.dashboard') }}" class="row g-2 mb-3">
+        <div class="col-md-8 col-lg-6">
+            <input type="text" name="search" class="form-control"
+                placeholder="Search by name, school name, or email" value="{{ search_term or '' }}">
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary">Search</button>
+        </div>
+        {% if search_term %}
+        <div class="col-auto">
+            <a href="{{ url_for('super_admin.dashboard') }}" class="btn btn-outline-secondary">Clear</a>
+        </div>
+        {% endif %}
+    </form>
+
 
     <!-- ADMINS TABLE -->
     <div class="card shadow-lg border-0 rounded-3">
