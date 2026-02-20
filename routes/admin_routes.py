@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from werkzeug.utils import secure_filename
+from sqlalchemy import or_
 from models import db
 from models.models import Certificate
 from models.admin import Admin
@@ -105,8 +106,20 @@ def dashboard():
             return redirect(url_for("auth.logout"))
     else:
         school_name = session["school_name"]
-    certificates = Certificate.query.filter_by(institution=school_name).all()
-    return render_template("admin/dashboard.html", certificates=certificates)
+
+    search_term = request.args.get("search", "").strip()
+    certificates_query = Certificate.query.filter_by(institution=school_name)
+
+    if search_term:
+        certificates_query = certificates_query.filter(
+            or_(
+                Certificate.reg_number.ilike(f"%{search_term}%"),
+                Certificate.student_name.ilike(f"%{search_term}%")
+            )
+        )
+
+    certificates = certificates_query.order_by(Certificate.uploaded_at.desc()).all()
+    return render_template("admin/dashboard.html", certificates=certificates, search_term=search_term)
 
 # ------------------------------ UPLOAD CERTIFICATE ------------------------------
 @admin_bp.route("/upload", methods=["GET", "POST"])
